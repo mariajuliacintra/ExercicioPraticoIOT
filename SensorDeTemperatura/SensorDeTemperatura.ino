@@ -8,7 +8,7 @@
 
 // Autenticação Adafruit IO
 #define IO_USERNAME 
-#define IO_KEY  
+#define IO_KEY 
 
 AdafruitIO_WiFi io(IO_USERNAME, IO_KEY, WIFI_SSID, WIFI_PASS);
 
@@ -30,6 +30,10 @@ NewPing sonar(TRIG_PIN, ECHO_PIN, MAX_DISTANCE);
 float temp_atual = 0;
 float temp_anterior = -1;
 
+unsigned int distancia = 0;
+unsigned int distancia_anterior = -1;  // inicializa com valor inválido
+
+
 //Variavel / ponteiro para referenciar o feed temperatura
 AdafruitIO_Feed *temperatura = io.feed("Temperatura");
 AdafruitIO_Feed *ledFeed = io.feed("botaoled");
@@ -45,7 +49,6 @@ const float Vcc = 3.3;
 
 //variaveis de controle
 bool alarmeAtivo = false;
-unsigned int distancia = 0;
 const int LIMITE_DISTANCIA = 15;
 
 void setup() {
@@ -98,14 +101,14 @@ void loop() {
   }
 
   distancia = sonar.ping_cm();
-  Serial.print(F("Distnacia lida: "));
+  Serial.print(F("Distância lida: "));
   Serial.print(distancia);
-  Serial.println("cm");
+  Serial.println(" cm");
 
-
-  if (distancia != 0) {
-    // mandando para o feed se a distancia for diferente de 0
+  // Atualiza apenas se mudou
+  if (distancia != 0 && distancia != distancia_anterior) {
     distanciaultrassom->save(distancia);
+    distancia_anterior = distancia;  // atualiza referência
   }
 
   //Ativação ou desativação do alarme
